@@ -13,15 +13,18 @@ class CardsBtn extends React.Component{
     let cardsArr = [
       {
         name: 'imgOne',                
-        src: "https://via.placeholder.com/150"
+        src: "https://via.placeholder.com/150",
+        founded : false 
       },
       {
         name: 'imgTwo',                
-        src: "https://via.placeholder.com/160"
+        src: "https://via.placeholder.com/160",
+        founded : false
       },
       {
         name: 'imgThree',                
-        src: "https://via.placeholder.com/170"
+        src: "https://via.placeholder.com/170",
+        founded : false
       }              
     ]
     function double(){
@@ -84,7 +87,8 @@ class CardsContainer extends React.Component{
       allMixImg : [],
       picName : [],
       imgId : [],
-      saveCorrectAns : []
+      saveCorrectAns : [],
+      youWin : false
     }
   }
 
@@ -94,20 +98,29 @@ class CardsContainer extends React.Component{
     })
   }
 
-  getNameImg(theName,index){
-    this.setState(state =>{
-      const imgId = state.imgId.concat(index)
-      return {imgId}                    
-    })
-    this.setState(state =>{
-      const picName = state.picName.concat(theName)
-      return {picName}                    
-    })
+  getNameImg(theName, index){
+    if(this.state.allMixImg[index].founded !== true){
+      this.setState(state =>{
+        const imgId = state.imgId.concat(index)
+        return {imgId}                    
+      })
+      this.setState(state =>{
+        const picName = state.picName.concat(theName)
+        return {picName}                    
+      })
+    }  
   }
-
   componentDidUpdate () {
-    const {picName, imgId} = this.state 
+    const {picName, imgId, allMixImg} = this.state 
+      // let boolArr = []
+      // allMixImg.map(item =>{
+      //   return boolArr.push(item.founded)
+      // })
+      // let youWinArr = boolArr.filter(item => item === false)
+  
+
     if(picName.length === 2){
+
       if(picName[0] === picName[1] && imgId[0] !== imgId[1]){
         this.setState({
           picName: []
@@ -116,25 +129,31 @@ class CardsContainer extends React.Component{
           const saveCorrectAns = state.saveCorrectAns.concat(imgId)
           return {saveCorrectAns}                    
         })
+
+        let devArrMix = [...allMixImg]
+        devArrMix[imgId[0]].founded = true
+        devArrMix[imgId[1]].founded = true
+
         this.setState({
+          allMixImg : devArrMix,
           imgId : []
         })
         return console.log('son iguales')
       }else{        
         this.setState({
-          picName: []
+          picName: [],
+          imgId : [],
+          youWin: true
         })
-        this.setState({
-          imgId : []
-        })
+        console.log(this.state.youWin)
         return console.log('son diferentes o precionaste 2 veces los mismo')
-      }                          
+      }  
+
     }
+
   }
 
   render(){
-    console.log( 'the id',this.state.imgId)
-    console.log('the arr of id',this.state.saveCorrectAns)
     return(
       <div className = 'card-container'>
         {this.state.allMixImg.length !== 0
@@ -143,8 +162,8 @@ class CardsContainer extends React.Component{
               <li key = {index}>
                 <ImgContainer 
                   srcUrl = {item.src}
-                  altName = {item.name}
-                  imgName = {(picName) => this.getNameImg(picName, index)}
+                  altName = {item.name}                
+                  imgName = {(picName) => this.getNameImg(picName, index )}
                 />
               </li>
             ))}
