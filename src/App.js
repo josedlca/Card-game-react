@@ -79,6 +79,19 @@ class ImgContainer extends React.Component{
   }
 }
 
+class YouWin extends React.Component{
+  render(){
+    return(
+      <div>
+        {this.props.areYouWinner === true 
+        ?<h2>Ganaste felicidades</h2> 
+        :<div></div>
+        }
+      </div>
+    )
+  }
+}
+
 
 class CardsContainer extends React.Component{
   constructor(props){
@@ -110,42 +123,51 @@ class CardsContainer extends React.Component{
       })
     }  
   }
+
+  areYouWining(){
+    let boolArr = []
+    this.state.allMixImg.map(item =>{
+      return boolArr.push(item.founded)
+    })
+    let youWinArr = boolArr.filter(item => item === false)
+    return youWinArr.length
+  }
+
   componentDidUpdate () {
     const {picName, imgId, allMixImg} = this.state 
-      // let boolArr = []
-      // allMixImg.map(item =>{
-      //   return boolArr.push(item.founded)
-      // })
-      // let youWinArr = boolArr.filter(item => item === false)
   
-
     if(picName.length === 2){
 
       if(picName[0] === picName[1] && imgId[0] !== imgId[1]){
-        this.setState({
-          picName: []
-        })
-        this.setState(state =>{
-          const saveCorrectAns = state.saveCorrectAns.concat(imgId)
-          return {saveCorrectAns}                    
-        })
+        if(this.areYouWining() !== 0){
+          this.setState({
+            picName: []
+          })
+          this.setState(state =>{
+            const saveCorrectAns = state.saveCorrectAns.concat(imgId)
+            return {saveCorrectAns}                    
+          })
 
-        let devArrMix = [...allMixImg]
-        devArrMix[imgId[0]].founded = true
-        devArrMix[imgId[1]].founded = true
+          let devArrMix = [...allMixImg]
+          devArrMix[imgId[0]].founded = true
+          devArrMix[imgId[1]].founded = true
 
-        this.setState({
-          allMixImg : devArrMix,
-          imgId : []
-        })
-        return console.log('son iguales')
+          this.setState({
+            allMixImg : devArrMix,
+            imgId : []
+          })
+          if(this.areYouWining() === 0){
+            this.setState({
+              youWin : true
+            })
+          }
+          return console.log('son iguales')
+        }
       }else{        
         this.setState({
           picName: [],
-          imgId : [],
-          youWin: true
+          imgId : []
         })
-        console.log(this.state.youWin)
         return console.log('son diferentes o precionaste 2 veces los mismo')
       }  
 
@@ -154,8 +176,10 @@ class CardsContainer extends React.Component{
   }
 
   render(){
+    console.log(this.state.youWin)
     return(
       <div className = 'card-container'>
+        <YouWin areYouWinner = {this.state.youWin}/>
         {this.state.allMixImg.length !== 0
           ?<ul>
             {this.state.allMixImg.map((item,index) =>(
