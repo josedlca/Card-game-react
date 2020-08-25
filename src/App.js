@@ -50,19 +50,16 @@ class CardsBtn extends React.Component{
       return seeMe
     }
     arrMixer(cardsArr)
-
-    if( seeMe.length !== 0){
-      return(
-        <div>
-          <button 
-            className ="px-6 py-3 border-solid border-2 border-black rounded-md outline-none pointer leading-none text-lg font-semibold"
-            onClick = {() => this.sendInfoToCardArr(seeMe)}
-          >
-              Start
-          </button>
-        </div>
-      )
-    }
+    return(
+      <div>
+        <button 
+          className ="px-6 py-3 border-solid border-2 border-black rounded-md outline-none pointer leading-none text-lg font-semibold"
+          onClick = {() => this.sendInfoToCardArr(seeMe)}
+        >
+            {this.props.btnText}
+        </button>
+      </div>
+    )
   }
 }
 
@@ -82,12 +79,20 @@ class ImgContainer extends React.Component{
         onClick = {()=> this.getImgName(this.props.altName, this.props.showState)}
       >
         <img 
-          className = {this.props.showState === 'open' ? "w-full back-face back-face-show" : "w-full back-face"}
+          className = {
+            this.props.showState === 'open' 
+            ? "w-full back-face back-face-show" 
+            : "w-full back-face"
+          }
           src={this.props.srcUrl} 
           alt={this.props.altName}          
         />
         <div 
-          className = {this.props.showState === 'open' ? "front-face w-full absolute top-0 left-0 bg-yellow-200 h-full front-face-hide" : "front-face w-full absolute top-0 left-0 bg-yellow-200 h-full"}
+          className = {
+            this.props.showState === 'open' 
+            ? "front-face w-full absolute top-0 left-0 bg-yellow-200 h-full front-face-hide" 
+            : "front-face w-full absolute top-0 left-0 bg-yellow-200 h-full"
+          }
         >
           <img className = "w-full h-full " src = {interrogacion} alt="interrogacion"/>
         </div>        
@@ -101,14 +106,13 @@ class YouWin extends React.Component{
     return(
       <div>
         {this.props.areYouWinner === true 
-        ?<h2>Ganaste felicidades</h2> 
+        ?<h2 className = 'text-2xl font-semibold'>*Ganaste felicidades*</h2> 
         :<div></div>
         }
       </div>
     )
   }
 }
-
 
 class CardsContainer extends React.Component{
   constructor(props){
@@ -123,7 +127,8 @@ class CardsContainer extends React.Component{
 
   getArrImg(stateName, imgInfoArr){
     this.setState({
-      [stateName]:imgInfoArr 
+      [stateName]:imgInfoArr ,
+      youWin: false
     })
   }
 
@@ -152,7 +157,20 @@ class CardsContainer extends React.Component{
     return youWinArr.length
   }
 
-  componentDidUpdate (prevProps, prevState) {
+  cardFailHide = (myPrevState)=>{
+    this.setState(prevState => ({
+      allMixImg: prevState.allMixImg.map(
+        (el, key) => myPrevState.imgId === key ? {...el, show: 'close'}: el
+      )
+    }))
+    this.setState(prevState => ({
+      allMixImg: prevState.allMixImg.map(
+        (el, key) => this.state.imgId === key ? {...el, show: 'close'}: el
+      )
+    }))
+  }
+
+  componentDidUpdate (prevProps,prevState) {
 
     if((this.state.picName !== null && prevState.picName !== null)){      
       if((prevState.picName === this.state.picName) && (prevState.imgId !== this.state.imgId) ){
@@ -169,23 +187,23 @@ class CardsContainer extends React.Component{
             youWin : true
           })
         }
-
         // limpia el state para que no guarde el anterior y poder trabajar con los clicks
         this.setState({
           picName : null
         })
         console.log('son iguales')
-      }else{ 
+      }
+      if((prevState.picName !== this.state.picName)&& (prevState.imgId !== this.state.imgId) ){ 
+        setTimeout(() => this.cardFailHide(prevState), 700)
         this.setState({
           picName : null
         })
-        console.log('son diferentes') 
       }
     }
   }
 
   render(){
-    console.log(this.state.allMixImg)
+    console.log(this.state.youWin)
     return(
       <div className = 'w-full inline-flex justify-center flex-col items-center'>
         <YouWin areYouWinner = {this.state.youWin}/>
@@ -202,16 +220,17 @@ class CardsContainer extends React.Component{
               </li>
             ))}
           </ul>
-          :<h2>Aun no inicias</h2>
+          :<h2 className = "text-2xl font-bold mb-10">Aun no inicias</h2>
         }
         <CardsBtn 
+          youWin = {this.state.youWin} 
+          btnText = {this.state.allMixImg.length !== 0 ? 'Nuevo Juego' : 'Start'}
           imgArrGet = {(imgArr) => this.getArrImg('allMixImg',imgArr)}
         />
       </div>
     )
   }
 }
-
 
 class App extends React.Component{
   render(){
